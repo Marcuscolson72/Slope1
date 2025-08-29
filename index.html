@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Slope Challenge</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; margin: 40px; }
+    .input-group { margin: 10px 0; }
+    canvas { border: 1px solid #333; margin-top: 20px; }
+    #result { font-weight: bold; margin-top: 15px; }
+  </style>
+</head>
+<body>
+  <h1>Slope Challenge</h1>
+  <p>Given two points, calculate the slope of the line passing through them.</p>
+  <div id="points"></div>
+  <div class="input-group">
+    <label for="userSlope">Your Slope (m): </label>
+    <input type="number" id="userSlope" step="any">
+    <button onclick="checkSlope()">Check</button>
+  </div>
+  <div id="result"></div>
+  <button id="nextBtn" onclick="nextQuestion()">Next Question</button>
+  <canvas id="plot" width="400" height="400"></canvas>
+  <script>
+    // Generate two random points
+    function randomPoint() {
+      return [Math.floor(Math.random() * 15) - 7, Math.floor(Math.random() * 15) - 7];
+    }
+    let p1, p2;
+    function generatePoints() {
+      p1 = randomPoint();
+      p2 = randomPoint();
+      while (p1[0] === p2[0]) p2 = randomPoint(); // avoid vertical line
+    }
+    function showPoints() {
+      document.getElementById('points').textContent = `Points: (${p1[0]}, ${p1[1]}) and (${p2[0]}, ${p2[1]})`;
+    }
+    function plotLine() {
+      const canvas = document.getElementById('plot');
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // Draw axes
+      ctx.strokeStyle = '#aaa';
+      ctx.beginPath();
+      ctx.moveTo(0, 200); ctx.lineTo(400, 200); // x-axis
+      ctx.moveTo(200, 0); ctx.lineTo(200, 400); // y-axis
+      ctx.stroke();
+      // Draw points
+      ctx.fillStyle = '#FF4136';
+      function toCanvas(x, y) {
+        return [200 + x * 20, 200 - y * 20];
+      }
+      let [cx1, cy1] = toCanvas(p1[0], p1[1]);
+      let [cx2, cy2] = toCanvas(p2[0], p2[1]);
+      ctx.beginPath();
+      ctx.arc(cx1, cy1, 6, 0, 2 * Math.PI); ctx.fill();
+      ctx.beginPath();
+      ctx.arc(cx2, cy2, 6, 0, 2 * Math.PI); ctx.fill();
+      // Draw line
+      ctx.strokeStyle = '#0074D9';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(cx1, cy1);
+      ctx.lineTo(cx2, cy2);
+      ctx.stroke();
+    }
+    function checkSlope() {
+      const userSlope = parseFloat(document.getElementById('userSlope').value);
+      const correctSlope = (p2[1] - p1[1]) / (p2[0] - p1[0]);
+      const result = document.getElementById('result');
+      if (isNaN(userSlope)) {
+        result.textContent = 'Please enter a valid number.';
+        result.style.color = 'black';
+        return;
+      }
+      if (Math.abs(userSlope - correctSlope) < 1e-6) {
+        result.textContent = 'Correct!';
+        result.style.color = 'green';
+      } else {
+        result.textContent = `Incorrect. The correct slope is ${correctSlope.toFixed(3)}`;
+        result.style.color = 'red';
+      }
+    }
+    function nextQuestion() {
+      generatePoints();
+      showPoints();
+      plotLine();
+      document.getElementById('userSlope').value = '';
+      document.getElementById('result').textContent = '';
+    }
+    // Initialize first question
+    generatePoints();
+    showPoints();
+    plotLine();
+  </script>
+</body>
+</html>
